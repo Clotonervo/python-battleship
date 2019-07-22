@@ -1,3 +1,4 @@
 # 3d-battleship
 
-Wesley Weisenberger
+##Concept:
+Text-based 3d battleship
