@@ -1,4 +1,4 @@
 # 3d-battleship
 
-##Concept:
+## Concept:
 Text-based 3d battleship
