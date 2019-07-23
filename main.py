@@ -4,7 +4,7 @@ import numpy as np
 class BattleShipGame():
     #create 3d matrix
     np.array([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]])
-
+print('Owen is cool')
 
     
     #function to place AI ships
