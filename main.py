@@ -75,7 +75,7 @@ class BattleshipGame:
         computer will user random to generate ship places
         """
         for ship in list(ships.keys()):
-            # genreate random coordinates and vlidate the postion
+            # genreate random coordinates and validate the postion
             valid = False
             while (not valid):
                 # use randint from import random
