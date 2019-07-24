@@ -1,4 +1,4 @@
 # python-battleship
 
 ## Concept:
-Text based battleshi
+Text based battleship
