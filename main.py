@@ -2,7 +2,7 @@
 import copy, random
 
 
-# class to contain all of battleship game
+# class to contain all of the battleship game
 class BattleshipGame:
     # function to print the board
     #wesley
