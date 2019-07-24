@@ -5,6 +5,7 @@ import copy, random
 # class to contain all of battleship game
 class BattleshipGame:
     # function to print the board
+    #wesley
     def print_board(self, s, board):
         # see if computer or user turn
         player = "Computer"
@@ -44,6 +45,7 @@ class BattleshipGame:
 
                 # function to let the user place the ships
 
+    #zach
     def user_place_ships(self, board, ships):
         """
         lets the user place ships and also check if they are valid positions
@@ -67,6 +69,7 @@ class BattleshipGame:
         return board
 
     # let the computer place/validate ships
+    #zach
     def computer_place_ships(self, board, ships):
         """
         computer will user random to generate ship places
@@ -91,6 +94,7 @@ class BattleshipGame:
         return board
 
     # let the user place a ship
+    #owen
     def place_ship(self, board, ship, s, ori, x, y):
         """
         accepts board, ship size, and position, places ship, it should already be verified by user_place_ships function
@@ -105,6 +109,7 @@ class BattleshipGame:
         return board
 
     # check if the ship will actually fit, bool
+    #owen
     def validate(self, board, ship, x, y, ori):
         """
         check if ship will fit, based on ship size, board, orientation, and coordinates
@@ -125,6 +130,7 @@ class BattleshipGame:
         return True
 
     # see if ship is horiz or vert
+    #soro
     def v_or_h(self):
         # get ship orientation from user
         while (True):
@@ -134,6 +140,7 @@ class BattleshipGame:
             else:
                 print("Invalid input. Please only enter v or h")
 
+    #soro
     def get_coor(self):
         """
         user will enter coordinates (row and column) for the ship to go
@@ -160,6 +167,7 @@ class BattleshipGame:
                 print(e)
 
     # see what move does
+    #owen
     def make_move(self, board, x, y):
         """
         make the move on the board and return the board, modified
@@ -171,6 +179,7 @@ class BattleshipGame:
         else:
             return "hit"
 
+    #wesley
     def user_move(self, board):
         """
         keep getting coordinates from the user and check if its a hit miss or sink
@@ -192,6 +201,7 @@ class BattleshipGame:
             if res != "try again":
                 return board
 
+    #wesley
     def computer_move(self, board):
         """
         generate random coorindates for the computer to try using random
@@ -213,6 +223,7 @@ class BattleshipGame:
             if res != "try again":
                 return board
 
+    #zach
     def check_sink(self, board, x, y):
         """
         figure out which ship is hit, then see how many points still exist in the ship, then see if sunk.
@@ -233,6 +244,7 @@ class BattleshipGame:
         if board[-1][ship] == 0:
             print(ship + " Sunk")
 
+    #soro
     def check_win(self, board):
         """
         once all ships are sunk, then someone wins, end game
@@ -245,6 +257,7 @@ class BattleshipGame:
         return True
 
     # function called to start program
+    #all of us 
     def main(self):
         # types of ships
         ships = {"Aircraft Carrier": 5,
@@ -269,6 +282,7 @@ class BattleshipGame:
         user_board = self.user_place_ships(user_board, ships)
         comp_board = self.computer_place_ships(comp_board, ships)
         # game main loop
+        #owen
         while (1):
             # user move
             self.print_board("c", comp_board)
