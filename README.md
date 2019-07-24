@@ -1,4 +1,4 @@
-# 3d-battleship
+# python-battleship
 
 ## Concept:
-Text-based 3d battleship
+Text based battleship
