@@ -1,11 +1,23 @@
 # import packages for program
 import copy, random
+import sys
+import numpy as np
+import math
 
 
 # class to contain all of the battleship game
 class BattleshipGame:
     # function to print the board
-    #wesley
+
+    def __init__(self):
+        self.ships = {"Aircraft Carrier": 5,
+                 "Battleship": 4,
+                 "Submarine": 3,
+                 "Destroyer": 3,
+                 "Patrol Boat": 2}
+        self.sunk_ships = []
+        self.original_board = None;
+
     def print_board(self, s, board):
         # see if computer or user turn
         player = "Computer"
@@ -45,7 +57,6 @@ class BattleshipGame:
 
                 # function to let the user place the ships
 
-    #zach
     def user_place_ships(self, board, ships):
         """
         lets the user place ships and also check if they are valid positions
@@ -68,8 +79,7 @@ class BattleshipGame:
         input("Done placing user ships. Press enter to continue")
         return board
 
-    # let the computer place/validate ships
-    #zach
+    # place ships
     def computer_place_ships(self, board, ships):
         """
         computer will user random to generate ship places
@@ -94,7 +104,6 @@ class BattleshipGame:
         return board
 
     # let the user place a ship
-    #owen
     def place_ship(self, board, ship, s, ori, x, y):
         """
         accepts board, ship size, and position, places ship, it should already be verified by user_place_ships function
@@ -109,7 +118,6 @@ class BattleshipGame:
         return board
 
     # check if the ship will actually fit, bool
-    #owen
     def validate(self, board, ship, x, y, ori):
         """
         check if ship will fit, based on ship size, board, orientation, and coordinates
@@ -130,7 +138,6 @@ class BattleshipGame:
         return True
 
     # see if ship is horiz or vert
-    #soro
     def v_or_h(self):
         # get ship orientation from user
         while (True):
@@ -140,7 +147,7 @@ class BattleshipGame:
             else:
                 print("Invalid input. Please only enter v or h")
 
-    #soro
+
     def get_coor(self):
         """
         user will enter coordinates (row and column) for the ship to go
@@ -167,7 +174,6 @@ class BattleshipGame:
                 print(e)
 
     # see what move does
-    #owen
     def make_move(self, board, x, y):
         """
         make the move on the board and return the board, modified
@@ -179,7 +185,7 @@ class BattleshipGame:
         else:
             return "hit"
 
-    #wesley
+
     def user_move(self, board):
         """
         keep getting coordinates from the user and check if its a hit miss or sink
@@ -201,7 +207,7 @@ class BattleshipGame:
             if res != "try again":
                 return board
 
-    #wesley
+
     def computer_move(self, board):
         """
         generate random coorindates for the computer to try using random
@@ -223,7 +229,114 @@ class BattleshipGame:
             if res != "try again":
                 return board
 
-    #zach
+    def count_hits(self, window):
+        hits = 0
+        for i in window:
+            if i == -2:
+                hits += 1
+        return hits
+
+
+    #This function will define the probabilities that the ships are in any given square
+    def define_probabilities(self, computer_view):
+        probabilities = np.zeros((10, 10))
+        ships = self.ships
+        print(self.sunk_ships)
+        #For each ship not sunk, check and see if there is a window, and add 1 to each place that its possible
+        # for that ship to be, both vertial and horizontal
+        # for example, if ship length = 3, then no windows of 2 should be included in those probabilities
+        for x in range(0, len(probabilities)):
+            for y in range(0, len(probabilities[0])):
+                probabilities[x][y] = computer_view[x][y]
+
+        for ship in ships:
+            if ship in self.sunk_ships:
+                continue
+            ship_length = self.ships.get(ship)
+            # get horizontal windows
+            for x in range(0, len(probabilities)):
+                for y in range(0, len(probabilities[0]) - ship_length + 1):
+                    window = probabilities[x][y: y + ship_length]
+                    if -1 in window:
+                        continue
+                    elif -3 in window:
+                        continue
+                    elif -2 in window:
+                        hits = self.count_hits(window)
+                        for i in range(0,len(window)):
+                            if window[i] != -2:
+                                window[i] += math.pow(10, hits)
+                    else:
+                        window += 1
+            # get vertical windows
+            for x in range(0, len(probabilities) - ship_length + 1):
+                for y in range(0, len(probabilities[0])):
+                    window = probabilities[x: x + ship_length, y]
+                    if -1 in window:
+                        continue
+                    elif -3 in window:
+                        continue
+                    elif -2 in window:
+                        hits = self.count_hits(window)
+                        for i in range(0,len(window)):
+                            if window[i] != -2:
+                                window[i] += math.pow(10, hits)
+                    else:
+                        window += 1
+
+        for x in range(0, len(probabilities)):
+            for y in range(0, len(probabilities[0])):
+                if computer_view[x][y] == -1:
+                    probabilities[x][y] = -1
+                elif computer_view[x][y] == -2:
+                    probabilities[x][y] = -2
+                elif computer_view[x][y] == -3:
+                    probabilities[x][y] = -3
+
+        print(probabilities)
+        return probabilities
+
+    # Here is the AI functionality
+    def ai_move(self, computer_view, board):
+        probabilities = self.define_probabilities(computer_view)
+        max = 0
+        for x in range(0, len(probabilities)):
+            for y in range(0, len(probabilities[0])):
+                if probabilities[x][y] > max:
+                    max = probabilities[x][y]
+                    row = x
+                    col = y
+
+        return self.ai_move_result(row, col, computer_view, board)
+
+    def mark_ship_as_sunk(self, row, col, computer_view):
+        ship_marking = self.original_board[row][col]
+        # go through and mark all instances of that ship to -3 for sinked on the computer view board
+        for x in range(0, len(computer_view)):
+            for y in range(0, len(computer_view[0])):
+                if self.original_board[x][y] == ship_marking:
+                    computer_view[x][y] = -3
+
+    #AI makes move, and here is what happens
+    def ai_move_result(self, row, col, computer_view, board):
+        res = self.make_move(board, row, col)
+        if res == "hit":
+            print("Hit at " + str(row + 1) + "," + str(col + 1))
+            sinked = self.check_sink(board, row, col)
+            computer_view[row][col] = -2
+            if sinked != "X":
+                self.sunk_ships.append(sinked)
+                self.mark_ship_as_sunk(row, col, computer_view)
+            board[row][col] = '$'
+            if self.check_win(board):
+                return "WIN"
+        elif res == "miss":
+            print("Sorry, " + str(row + 1) + "," + str(col + 1) + " is a miss.")
+            board[row][col] = "*"
+            computer_view[row][col] = -1
+        if res != "try again":
+            return board
+
     def check_sink(self, board, x, y):
         """
         figure out which ship is hit, then see how many points still exist in the ship, then see if sunk.
@@ -243,8 +356,9 @@ class BattleshipGame:
         board[-1][ship] -= 1
         if board[-1][ship] == 0:
             print(ship + " Sunk")
+            return ship
+        return "X"
 
-    #soro
     def check_win(self, board):
         """
         once all ships are sunk, then someone wins, end game
@@ -257,14 +371,8 @@ class BattleshipGame:
         return True
 
     # function called to start program
-    #all of us 
-    def main(self):
+    def main(self, ai):
         # types of ships
-        ships = {"Aircraft Carrier": 5,
-                 "Battleship": 4,
-                 "Submarine": 3,
-                 "Destroyer": 3,
-                 "Patrol Boat": 2}
         # setup blank 10x10 board
         board = []
         for i in range(10):
@@ -276,16 +384,19 @@ class BattleshipGame:
         user_board = copy.deepcopy(board)
         comp_board = copy.deepcopy(board)
         # add ships in array
-        user_board.append(copy.deepcopy(ships))
-        comp_board.append(copy.deepcopy(ships))
+        user_board.append(copy.deepcopy(self.ships))
+        comp_board.append(copy.deepcopy(self.ships))
         # ship placement
-        user_board = self.user_place_ships(user_board, ships)
-        comp_board = self.computer_place_ships(comp_board, ships)
+        user_board = self.computer_place_ships(user_board, self.ships)
+        comp_board = self.computer_place_ships(comp_board, self.ships)
+        self.original_board = copy.deepcopy(user_board)
+        computer_view = np.zeros((10,10));
+
         # game main loop
         #owen
         while (1):
             # user move
-            self.print_board("c", comp_board)
+            # self.print_board("c", comp_board)
             comp_board = self.user_move(comp_board)
             # check if user won
             if comp_board == "WIN":
@@ -293,16 +404,20 @@ class BattleshipGame:
                 quit()
             # display current computer board
             self.print_board("c", comp_board)
-            input("To end user turn hit ENTER")
             # computer move
-            user_board = self.computer_move(user_board)
+            # print(ai)
+            # if ai == "ai":
+            user_board = self.ai_move(computer_view, user_board)
+            # else:
+            #     user_board = self.computer_move(user_board)
             # check if computer move
             if user_board == "WIN":
                 print("Computer WON! :(")
                 quit()
+            self.print_board("u", user_board)
+
             # display user board
-            input("To end computer turn hit ENTER")
 
 
 root = BattleshipGame()
-root.main()
+root.main(sys.argv[1])
